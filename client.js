@@ -5,6 +5,7 @@ window.__ModuleLoader__.load({
     const h = React.createElement
     const { useEffect, useLayoutEffect, useRef, useState } = React
 
+    // Runtime UI copy. locale/*.json only feeds plugin-manager metadata (meta.title/description).
     const COPY = {
       zh: {
         title: '用量',
