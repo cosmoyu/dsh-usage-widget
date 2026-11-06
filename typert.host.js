@@ -77,7 +77,6 @@ const stateSchema = z.object({
     scanMs: num,
     account: z.object({
       name: z.string(),
-      avatarUrl: z.string(),
     }).nullable(),
   }),
 })
@@ -97,18 +96,18 @@ export const TYPERT = {
   schemas: [],
   invocations: [
     {
-      id: 'dshcost-skill#avatarCost/getState',
-      service: 'avatarCost',
-      namespace: 'avatarCost',
+      id: 'dshcost-skill#usageCost/getState',
+      service: 'usageCost',
+      namespace: 'usageCost',
       method: 'getState',
       invocation: { kind: 'direct' },
       parameters: [],
       result: stateCodec,
     },
     {
-      id: 'dshcost-skill#avatarCost/refresh',
-      service: 'avatarCost',
-      namespace: 'avatarCost',
+      id: 'dshcost-skill#usageCost/refresh',
+      service: 'usageCost',
+      namespace: 'usageCost',
       method: 'refresh',
       invocation: { kind: 'direct' },
       parameters: [],
@@ -118,14 +117,14 @@ export const TYPERT = {
   model: {
     services: [
       {
-        description: 'Compact balance and usage snapshot for the sidebar avatar.',
+        description: 'Compact balance and usage snapshot for the sidebar footer.',
         summary: 'Balance ring, seven-day usage, and today\'s token/call/cost/cache-hit summary.',
         tags: ['usage', 'balance'],
-        key: 'avatarCost',
+        key: 'usageCost',
         exportName: 'default',
         members: [
-          { kind: 'method', name: 'getState', signature: 'getState(): Promise<AvatarCostState>', summary: 'Read the current cached snapshot.' },
-          { kind: 'method', name: 'refresh', signature: 'refresh(): Promise<AvatarCostState>', summary: 'Re-read the wallet and session logs.' },
+          { kind: 'method', name: 'getState', signature: 'getState(): Promise<UsageCostState>', summary: 'Read the current cached snapshot.' },
+          { kind: 'method', name: 'refresh', signature: 'refresh(): Promise<UsageCostState>', summary: 'Re-read the wallet and session logs.' },
         ],
         types: [],
       },

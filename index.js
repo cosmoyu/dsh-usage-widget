@@ -13,7 +13,7 @@ import * as zlib from 'node:zlib'
  * is used only as a fallback.
  */
 
-const SERVICE_KEY = 'avatarCost'
+const SERVICE_KEY = 'usageCost'
 const DAY_MS = 86_400_000
 const HKT_OFFSET_MS = 8 * 3_600_000
 const PEAK_WINDOWS = [[1, 4], [6, 10]]
@@ -473,7 +473,6 @@ async function accountProfile(ctx) {
       if (details?.status === 'ready') {
         value = {
           name: typeof details.value?.name === 'string' ? details.value.name : (typeof details.value?.contact === 'string' ? details.value.contact : ''),
-          avatarUrl: typeof details.value?.avatarUrl === 'string' ? details.value.avatarUrl : '',
         }
       }
     } catch { value = null }
@@ -488,16 +487,8 @@ function displayCurrencyOf(balance) {
 
 function fxRateOf(currency) {
   if (currency === 'USD') return 1
-  const configured = Number(process.env.DSH_AVATAR_COST_FX)
+  const configured = Number(process.env.DSH_USAGE_COST_FX)
   return Number.isFinite(configured) && configured > 0 ? configured : 7.2
-}
-
-function validateUrl(value) {
-  if (typeof value !== 'string' || value.length > 2048) return ''
-  try {
-    const url = new URL(value)
-    return url.protocol === 'https:' || url.protocol === 'http:' ? url.href : ''
-  } catch { return '' }
 }
 
 async function readBalance(ctx, force) {
@@ -557,17 +548,41 @@ async function getState(ctx, force) {
       scanMs: scan.scanMs,
       account: profile === null ? null : {
         name: typeof profile.name === 'string' ? profile.name.slice(0, 120) : '',
-        avatarUrl: validateUrl(profile.avatarUrl),
       },
     },
   }
 }
 
+/**
+ * The Gateway discovers Remote methods from the @Remote marker descriptor on the
+ * Service prototype. This plugin is hand-written JavaScript, so write the same
+ * versioned descriptor the Typert decorator writes instead of importing it.
+ */
+const REMOTE_METHOD_DESCRIPTOR = '@deepseek-ai/dsh-typert-protocol/remote-methods'
+
+function markRemoteMethods(prototype, names) {
+  Object.defineProperty(prototype, REMOTE_METHOD_DESCRIPTOR, {
+    configurable: true,
+    value: Object.freeze({
+      version: 1,
+      methods: Object.freeze(names.map(name => Object.freeze({
+        method: name,
+        invocation: Object.freeze({ kind: 'direct' }),
+      }))),
+    }),
+  })
+}
+
+class UsageCostService {
+  constructor(ctx) { this.ctx = ctx }
+  async getState() { return getState(this.ctx, false) }
+  async refresh() { return getState(this.ctx, true) }
+}
+
+markRemoteMethods(UsageCostService.prototype, ['getState', 'refresh'])
+
 function createService(ctx) {
-  const service = {
-    async getState() { return getState(ctx, false) },
-    async refresh() { return getState(ctx, true) },
-  }
+  const service = new UsageCostService(ctx)
   Object.defineProperty(service, 'typertRemote', {
     configurable: false,
     enumerable: false,

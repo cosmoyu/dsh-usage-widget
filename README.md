@@ -1,6 +1,6 @@
 # 用量卡片 / Usage card
 
-DeepSeek Harness 侧栏头像上方的用量卡片。
+DeepSeek Harness 侧栏底部的用量卡片。
 
 ![用量卡片](docs/preview.png)
 
@@ -8,6 +8,7 @@ DeepSeek Harness 侧栏头像上方的用量卡片。
 
 - 账户余额
 - 本轮对话：输入、输出、缓存命中、花费；点击可切换到今日汇总
+- 默认缩小显示「余额 + 本轮对话」，点标题栏的展开按钮（刷新按钮左侧）可展开高峰时间轴和最近 10 轮；展开 / 收起带缓动动画，选择会被记住
 - 24 小时高峰 / 低谷时间轴
 - 最近 10 轮输入 / 输出用量
 - 跟随 DSH 语言切换，支持全部 8 种语言
@@ -26,7 +27,7 @@ plugin_manager install_bundle <dshcost-skill 的绝对路径>
 
 安装后刷新页面。
 
-插件依赖 `zod`；如果 profile 安装时未自动安装依赖，可在插件目录执行 `npm install`。读取 `.zstd` 会话日志需要 Node 22.15+。
+插件依赖 `zod`（`typert.host.js` 严格清单使用）；如果 profile 安装时未自动安装依赖，可在插件目录执行 `pnpm install` 或 `npm install`。读取 `.zstd` 会话日志需要 Node 22.15+。
 
 ## 说明
 

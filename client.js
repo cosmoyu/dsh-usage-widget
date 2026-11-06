@@ -22,6 +22,8 @@ window.__ModuleLoader__.load({
         weekend: '周末',
         holiday: '假期',
         refresh: '刷新',
+        collapse: '缩小面板',
+        expand: '展开面板',
         loading: '读取中',
         unpriced: '部分模型未定价',
         until: '距',
@@ -42,6 +44,8 @@ window.__ModuleLoader__.load({
         weekend: 'Weekend',
         holiday: 'Holiday',
         refresh: 'Refresh',
+        collapse: 'Collapse',
+        expand: 'Expand',
         loading: 'Loading',
         unpriced: 'Some models are unpriced',
         until: 'to',
@@ -62,6 +66,8 @@ window.__ModuleLoader__.load({
         weekend: 'Wochenende',
         holiday: 'Feiertag',
         refresh: 'Aktualisieren',
+        collapse: 'Einklappen',
+        expand: 'Ausklappen',
         loading: 'Wird geladen',
         unpriced: 'Einige Modelle ohne Preis',
         until: 'bis',
@@ -82,6 +88,8 @@ window.__ModuleLoader__.load({
         weekend: 'Fin de semana',
         holiday: 'Festivo',
         refresh: 'Actualizar',
+        collapse: 'Contraer',
+        expand: 'Expandir',
         loading: 'Cargando',
         unpriced: 'Algunos modelos sin precio',
         until: 'hasta',
@@ -102,6 +110,8 @@ window.__ModuleLoader__.load({
         weekend: 'Week-end',
         holiday: 'Jour férié',
         refresh: 'Actualiser',
+        collapse: 'Réduire',
+        expand: 'Développer',
         loading: 'Chargement',
         unpriced: 'Certains modèles sans tarif',
         until: 'dans',
@@ -122,6 +132,8 @@ window.__ModuleLoader__.load({
         weekend: '週末',
         holiday: '祝日',
         refresh: '更新',
+        collapse: '折りたたむ',
+        expand: '展開する',
         loading: '読み込み中',
         unpriced: '一部モデルは価格未設定',
         until: 'あと',
@@ -142,6 +154,8 @@ window.__ModuleLoader__.load({
         weekend: 'Fim de semana',
         holiday: 'Feriado',
         refresh: 'Atualizar',
+        collapse: 'Recolher',
+        expand: 'Expandir',
         loading: 'Carregando',
         unpriced: 'Alguns modelos sem preço',
         until: 'até',
@@ -162,6 +176,8 @@ window.__ModuleLoader__.load({
         weekend: 'Выходные',
         holiday: 'Праздник',
         refresh: 'Обновить',
+        collapse: 'Свернуть',
+        expand: 'Развернуть',
         loading: 'Загрузка',
         unpriced: 'Некоторые модели без цены',
         until: 'до',
@@ -209,6 +225,20 @@ window.__ModuleLoader__.load({
       return result
     }
 
+    /** Keep the Gateway's failure message visible instead of a bare "read failed". */
+    function failureText(result) {
+      if (result && typeof result === 'object') {
+        const error = result.error
+        if (typeof error === 'string' && error.length > 0) return error
+        if (error && typeof error === 'object' && typeof error.message === 'string' && error.message.length > 0) return error.message
+        try {
+          const text = JSON.stringify(result)
+          if (typeof text === 'string' && text.length > 0 && text !== '{}') return text.slice(0, 200)
+        } catch { /* Ignore cyclic results. */ }
+      }
+      return result === undefined ? 'undefined' : String(result)
+    }
+
     /** One shared poller for the always-visible footer card. */
     function createUsageStore(api) {
       let snapshot = { state: null, error: '', busy: false, loaded: false }
@@ -234,7 +264,7 @@ window.__ModuleLoader__.load({
           if (value && typeof value === 'object' && value.balance && Array.isArray(value.turns)) {
             set({ state: value, error: '', loaded: true, busy: false })
           } else {
-            set({ error: '读取失败', loaded: true, busy: false })
+            set({ error: '读取失败: ' + failureText(result), loaded: true, busy: false })
           }
         } catch (reason) {
           set({ error: reason instanceof Error ? reason.message : String(reason), loaded: true, busy: false })
@@ -325,6 +355,7 @@ window.__ModuleLoader__.load({
       }
       .ac-card-head { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
       .ac-card-title { color: var(--dsw-alias-label-secondary); font-size: 11px; font-weight: 650; letter-spacing: .01em; }
+      .ac-card-actions { display: flex; align-items: center; gap: 2px; flex: none; }
       .ac-iconbtn {
         display: grid;
         place-items: center;
@@ -445,6 +476,29 @@ window.__ModuleLoader__.load({
       .ac-empty { display: grid; place-items: center; height: 58px; color: var(--dsw-alias-label-secondary); font-size: 10px; }
       .ac-note { margin-top: 5px; color: var(--dsw-alias-label-secondary); font-size: 9px; line-height: 1.4; }
       .ac-note.warn { color: var(--dsw-alias-state-warn-primary); }
+      .ac-collapsible {
+        display: grid;
+        grid-template-rows: 0fr;
+        opacity: 0;
+        visibility: hidden;
+        transition:
+          grid-template-rows .3s cubic-bezier(.2, .8, .3, 1),
+          opacity .24s ease,
+          visibility 0s linear .3s;
+      }
+      .ac-collapsible.open {
+        grid-template-rows: 1fr;
+        opacity: 1;
+        visibility: visible;
+        transition:
+          grid-template-rows .3s cubic-bezier(.2, .8, .3, 1),
+          opacity .24s ease,
+          visibility 0s linear 0s;
+      }
+      .ac-collapsible-inner { min-height: 0; overflow: hidden; }
+      @media (prefers-reduced-motion: reduce) {
+        .ac-collapsible, .ac-collapsible.open { transition: none; }
+      }
     `
 
     function IconWallet() {
@@ -492,6 +546,20 @@ window.__ModuleLoader__.load({
       return h('svg', { width: 13, height: 13, viewBox: '0 0 16 16', 'aria-hidden': true },
         h('path', { d: 'M13.4 6.2A5.6 5.6 0 1 0 14 8', fill: 'none', stroke: 'currentColor', strokeWidth: 1.5, strokeLinecap: 'round' }),
         h('path', { d: 'M13.5 2.7v3.8H9.7', fill: 'none', stroke: 'currentColor', strokeWidth: 1.5, strokeLinecap: 'round', strokeLinejoin: 'round' }),
+      )
+    }
+
+    function CollapseIcon() {
+      return h('svg', { width: 13, height: 13, viewBox: '0 0 16 16', 'aria-hidden': true },
+        h('path', { d: 'M4 6.4 8 10.4l4-4', fill: 'none', stroke: 'currentColor', strokeWidth: 1.5, strokeLinecap: 'round', strokeLinejoin: 'round' }),
+        h('path', { d: 'M4 13h8', fill: 'none', stroke: 'currentColor', strokeWidth: 1.5, strokeLinecap: 'round' }),
+      )
+    }
+
+    function ExpandIcon() {
+      return h('svg', { width: 13, height: 13, viewBox: '0 0 16 16', 'aria-hidden': true },
+        h('path', { d: 'M4 9.6 8 5.6l4 4', fill: 'none', stroke: 'currentColor', strokeWidth: 1.5, strokeLinecap: 'round', strokeLinejoin: 'round' }),
+        h('path', { d: 'M4 13h8', fill: 'none', stroke: 'currentColor', strokeWidth: 1.5, strokeLinecap: 'round' }),
       )
     }
 
@@ -677,12 +745,28 @@ window.__ModuleLoader__.load({
       )
     }
 
+    const COLLAPSED_KEY = 'dshcost:collapsed'
+
+    /** Compact is the default; an explicit expand is remembered across reloads. */
+    function readCollapsed() {
+      try {
+        if (window.localStorage.getItem(COLLAPSED_KEY) === 'expanded') return false
+      } catch { /* Storage can be unavailable. */ }
+      return true
+    }
+
+    function writeCollapsed(collapsed) {
+      try { window.localStorage.setItem(COLLAPSED_KEY, collapsed ? 'collapsed' : 'expanded') } catch { /* Ignore. */ }
+    }
+
     function UsageCard({ store, wide, localeFace }) {
       const localeSnapshot = useSync(localeFace.subscribe, localeFace.getSnapshot)
       const activeLocale = String(localeSnapshot?.active ?? 'zh')
       const localeKey = localeKeyOf(activeLocale)
       const t = COPY[localeKey]
       const snapshot = useSync(store.subscribe, store.getSnapshot)
+      const [collapsed, setCollapsed] = useState(readCollapsed)
+      useEffect(() => { writeCollapsed(collapsed) }, [collapsed])
       if (wide === false) return null
       const state = snapshot.state
       const balance = state?.balance
@@ -728,17 +812,46 @@ window.__ModuleLoader__.load({
         ),
       )
 
-      return h('section', { className: 'ac-card', 'aria-label': t.title },
+      const details = h('div', {
+        className: 'ac-collapsible' + (collapsed ? '' : ' open'),
+        'aria-hidden': collapsed ? 'true' : 'false',
+      },
+        h('div', { className: 'ac-collapsible-inner' },
+          h(PeakTimeline, { peak: state?.peak, t, localeKey }),
+          h('div', { className: 'ac-section' },
+            h('div', { className: 'ac-section-head' },
+              h('span', { className: 'ac-section-title' }, t.lastTurns),
+              h('span', { className: 'ac-legend' },
+                h('span', null, h('i', { className: 'in' }), t.input),
+                h('span', null, h('i', { className: 'out' }), t.output),
+              ),
+            ),
+            h(TurnChart, { turns, t, currency }),
+          ),
+          (today?.unpricedCalls ?? 0) > 0 ? h('div', { className: 'ac-note warn' }, t.unpriced) : null,
+        ),
+      )
+
+      return h('section', { className: 'ac-card' + (collapsed ? ' ac-collapsed' : ''), 'aria-label': t.title },
         h('style', null, CSS),
         h('div', { className: 'ac-card-head' },
           h('span', { className: 'ac-card-title' }, t.title),
-          h('button', {
-            className: 'ac-iconbtn', type: 'button',
-            onClick: () => store.refresh(),
-            disabled: snapshot.busy,
-            title: t.refresh,
-            'aria-label': t.refresh,
-          }, h(RefreshIcon)),
+          h('div', { className: 'ac-card-actions' },
+            h('button', {
+              className: 'ac-iconbtn', type: 'button',
+              onClick: () => setCollapsed(value => !value),
+              title: collapsed ? t.expand : t.collapse,
+              'aria-label': collapsed ? t.expand : t.collapse,
+              'aria-expanded': collapsed ? 'false' : 'true',
+            }, collapsed ? h(ExpandIcon) : h(CollapseIcon)),
+            h('button', {
+              className: 'ac-iconbtn', type: 'button',
+              onClick: () => store.refresh(),
+              disabled: snapshot.busy,
+              title: t.refresh,
+              'aria-label': t.refresh,
+            }, h(RefreshIcon)),
+          ),
         ),
         h('div', { className: 'ac-top' },
           h('div', { className: 'ac-balance' },
@@ -754,19 +867,7 @@ window.__ModuleLoader__.load({
           back: roundBack,
         }),
 
-        h(PeakTimeline, { peak: state?.peak, t, localeKey }),
-
-        h('div', { className: 'ac-section' },
-          h('div', { className: 'ac-section-head' },
-            h('span', { className: 'ac-section-title' }, t.lastTurns),
-            h('span', { className: 'ac-legend' },
-              h('span', null, h('i', { className: 'in' }), t.input),
-              h('span', null, h('i', { className: 'out' }), t.output),
-            ),
-          ),
-          h(TurnChart, { turns, t, currency }),
-        ),
-        (today?.unpricedCalls ?? 0) > 0 ? h('div', { className: 'ac-note warn' }, t.unpriced) : null,
+        details,
         snapshot.error ? h('div', { className: 'ac-note warn' }, snapshot.error) : null,
         !snapshot.loaded ? h('div', { className: 'ac-note' }, t.loading) : null,
       )
@@ -782,18 +883,18 @@ window.__ModuleLoader__.load({
       package: 'dshcost-skill',
       descriptors: [
         {
-          id: 'dshcost-skill#avatarCost/getState',
-          service: 'avatarCost',
-          namespace: 'avatarCost',
+          id: 'dshcost-skill#usageCost/getState',
+          service: 'usageCost',
+          namespace: 'usageCost',
           method: 'getState',
           invocation: { kind: 'direct' },
           parameters: [],
           result: stateCodec,
         },
         {
-          id: 'dshcost-skill#avatarCost/refresh',
-          service: 'avatarCost',
-          namespace: 'avatarCost',
+          id: 'dshcost-skill#usageCost/refresh',
+          service: 'usageCost',
+          namespace: 'usageCost',
           method: 'refresh',
           invocation: { kind: 'direct' },
           parameters: [],
@@ -811,9 +912,9 @@ window.__ModuleLoader__.load({
         return
       }
       if (typeof unmount === 'function') ctx.effect(() => () => unmount(), 'dshcost: remote contribution')
-      const api = ctx.get('remote.avatarCost')
+      const api = ctx.get('remote.usageCost')
       if (api === undefined) {
-        console.error('[dshcost-skill] remote.avatarCost is unavailable')
+        console.error('[dshcost-skill] remote.usageCost is unavailable')
         return
       }
       const localeService = ctx.get('locale')
