@@ -1,5 +1,5 @@
 window.__ModuleLoader__.load({
-  id: 'dsh-avatar-cost',
+  id: 'dshcost-skill',
   factory(require) {
     const React = require('react')
     const h = React.createElement
@@ -773,15 +773,15 @@ window.__ModuleLoader__.load({
 
     function parseIdentity(value) { return value }
     function codec(name, schema) {
-      return { mode: 'strict', typeSymbol: 'dsh-avatar-cost#' + name, schema, create: () => schema }
+      return { mode: 'strict', typeSymbol: 'dshcost-skill#' + name, schema, create: () => schema }
     }
 
     const stateCodec = codec('State', { parse: parseIdentity })
     const descriptors = {
-      package: 'dsh-avatar-cost',
+      package: 'dshcost-skill',
       descriptors: [
         {
-          id: 'dsh-avatar-cost#avatarCost/getState',
+          id: 'dshcost-skill#avatarCost/getState',
           service: 'avatarCost',
           namespace: 'avatarCost',
           method: 'getState',
@@ -790,7 +790,7 @@ window.__ModuleLoader__.load({
           result: stateCodec,
         },
         {
-          id: 'dsh-avatar-cost#avatarCost/refresh',
+          id: 'dshcost-skill#avatarCost/refresh',
           service: 'avatarCost',
           namespace: 'avatarCost',
           method: 'refresh',
@@ -806,13 +806,13 @@ window.__ModuleLoader__.load({
       if (!remote || typeof remote.$mount !== 'function') return
       let unmount
       try { unmount = await remote.$mount(descriptors) } catch (reason) {
-        console.error('[dsh-avatar-cost] remote mount failed', reason)
+        console.error('[dshcost-skill] remote mount failed', reason)
         return
       }
-      if (typeof unmount === 'function') ctx.effect(() => () => unmount(), 'avatar-cost: remote contribution')
+      if (typeof unmount === 'function') ctx.effect(() => () => unmount(), 'dshcost: remote contribution')
       const api = ctx.get('remote.avatarCost')
       if (api === undefined) {
-        console.error('[dsh-avatar-cost] remote.avatarCost is unavailable')
+        console.error('[dshcost-skill] remote.avatarCost is unavailable')
         return
       }
       const localeService = ctx.get('locale')
@@ -837,11 +837,11 @@ window.__ModuleLoader__.load({
       const slots = ctx.get('slots')
       if (slots === undefined || typeof slots.inject !== 'function') return
       const store = createUsageStore(api)
-      ctx.effect(() => () => store.dispose(), 'avatar-cost: usage polling')
+      ctx.effect(() => () => store.dispose(), 'dshcost: usage polling')
       store.start()
       slots.inject('sidebar.footer.action', () => slots.register({
         name: 'sidebar.footer.action',
-        id: 'avatar-cost-card',
+        id: 'dshcost-card',
         order: -10,
         label: () => titleOf(localeFace.getSnapshot()),
         inject: () => ({ store, localeFace }),

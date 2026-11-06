@@ -84,7 +84,7 @@ const stateSchema = z.object({
 
 const strictCodec = (name, schema) => ({
   mode: 'strict',
-  typeSymbol: 'dsh-avatar-cost#' + name,
+  typeSymbol: 'dshcost-skill#' + name,
   schema,
   create: () => schema,
 })
@@ -92,12 +92,12 @@ const strictCodec = (name, schema) => ({
 const stateCodec = strictCodec('State', stateSchema)
 
 export const TYPERT = {
-  package: 'dsh-avatar-cost',
+  package: 'dshcost-skill',
   face: 'host',
   schemas: [],
   invocations: [
     {
-      id: 'dsh-avatar-cost#avatarCost/getState',
+      id: 'dshcost-skill#avatarCost/getState',
       service: 'avatarCost',
       namespace: 'avatarCost',
       method: 'getState',
@@ -106,7 +106,7 @@ export const TYPERT = {
       result: stateCodec,
     },
     {
-      id: 'dsh-avatar-cost#avatarCost/refresh',
+      id: 'dshcost-skill#avatarCost/refresh',
       service: 'avatarCost',
       namespace: 'avatarCost',
       method: 'refresh',

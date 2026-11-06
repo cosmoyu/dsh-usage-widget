@@ -15,13 +15,13 @@ DeepSeek Harness 侧栏头像上方的用量卡片。
 ## 安装
 
 ```bash
-git clone https://github.com/cosmoyu/dscost-skill.git dsh-avatar-cost
+git clone https://github.com/cosmoyu/dshcost-skill.git dshcost-skill
 ```
 
 在 DSH 中执行：
 
 ```text
-plugin_manager install_bundle <dsh-avatar-cost 的绝对路径>
+plugin_manager install_bundle <dshcost-skill 的绝对路径>
 ```
 
 安装后刷新页面。

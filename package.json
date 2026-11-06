@@ -1,16 +1,16 @@
 {
-  "name": "dsh-avatar-cost",
+  "name": "dshcost-skill",
   "version": "1.0.0",
   "private": true,
   "type": "module",
   "description": "Usage card with account balance, current-turn metrics, peak timeline, and last 10 turns on the DSH sidebar footer.",
   "repository": {
     "type": "git",
-    "url": "https://github.com/cosmoyu/dscost-skill.git"
+    "url": "https://github.com/cosmoyu/dshcost-skill.git"
   },
-  "homepage": "https://github.com/cosmoyu/dscost-skill",
+  "homepage": "https://github.com/cosmoyu/dshcost-skill",
   "bugs": {
-    "url": "https://github.com/cosmoyu/dscost-skill/issues"
+    "url": "https://github.com/cosmoyu/dshcost-skill/issues"
   },
   "exports": {
     ".": "./index.js",
@@ -47,3 +47,4 @@
   },
   "license": "MIT"
 }
+
