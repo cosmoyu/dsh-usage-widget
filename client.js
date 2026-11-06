@@ -13,7 +13,7 @@ window.__ModuleLoader__.load({
         input: '输入',
         output: '输出',
         cost: '花费',
-        cache: '缓存',
+        cache: '缓存命中',
         lastTurns: '最近 10 轮',
         noTurns: '暂无轮次',
         peak: '高峰',
@@ -392,12 +392,12 @@ window.__ModuleLoader__.load({
       .ac-round-title-wrap .ac-ico { width: 12px; height: 12px; color: var(--dsw-alias-label-secondary); flex: none; }
       .ac-round-title { color: var(--dsw-alias-label-primary); font-size: 11px; font-weight: 650; white-space: nowrap; }
       .ac-round-chevron { width: 10px; height: 10px; color: var(--dsw-alias-label-secondary); flex: none; }
-      .ac-round-grid { display: grid; grid-template-columns: 1fr 1fr 1.3fr 1.15fr; align-items: stretch; flex: 1; min-height: 0; }
+      .ac-round-grid { display: grid; grid-template-columns: 1fr 1fr 1.7fr 1.1fr; align-items: stretch; flex: 1; min-height: 0; }
       .ac-round-cell { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; min-width: 0; padding: 0 3px; border-radius: 0; background: transparent; }
       .ac-round-cell + .ac-round-cell { border-left: 1px solid var(--dsw-alias-border-l1); }
-      .ac-round-label { display: flex; align-items: center; justify-content: center; gap: 2px; width: 100%; color: var(--dsw-alias-label-secondary); font-size: 10px; white-space: nowrap; }
+      .ac-round-label { display: flex; align-items: center; justify-content: center; gap: 3px; width: 100%; color: var(--dsw-alias-label-secondary); font-size: 10px; white-space: nowrap; }
       .ac-round-label .ac-ico { width: 11px; height: 11px; flex: none; }
-      .ac-round-label-text { display: block; flex: 1 1 auto; min-width: 0; overflow: hidden; white-space: nowrap; text-align: center; font-size: 10px; }
+      .ac-round-label-text { display: block; flex: 0 1 auto; min-width: 0; max-width: calc(100% - 14px); overflow: hidden; white-space: nowrap; text-align: left; font-size: 10px; }
       .ac-round-value { display: block; overflow: hidden; width: 100%; max-width: 100%; color: var(--dsw-alias-label-primary); font-size: 18px; font-weight: 650; font-variant-numeric: tabular-nums; text-align: center; text-overflow: clip; white-space: nowrap; }
       .ac-round-unit { color: var(--dsw-alias-label-secondary); font-size: .66em; font-weight: 500; letter-spacing: 0; }
       .ac-round-unit.prefix { margin-right: 1px; }
