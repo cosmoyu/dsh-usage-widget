@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Uso",
+    "description": "Muestra el saldo, entrada/salida/caché/coste del turno actual, la franja de 24 horas y los últimos 10 turnos."
+  }
+}

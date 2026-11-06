@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Utilisation",
+    "description": "Affiche le solde, entrée/sortie/cache/coût du tour actuel, la chronologie des 24 heures et les 10 derniers tours."
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "name": "dsh-avatar-cost",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Usage card with account balance, current-turn metrics, peak timeline, and last 10 turns on the DSH sidebar footer.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cosmoyu/dscost-skill.git"
+  },
+  "homepage": "https://github.com/cosmoyu/dscost-skill",
+  "bugs": {
+    "url": "https://github.com/cosmoyu/dscost-skill/issues"
+  },
+  "exports": {
+    ".": "./index.js",
+    "./client": "./client.js",
+    "./typert": "./typert.host.js",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg"
+  },
+  "files": [
+    "index.js",
+    "client.js",
+    "typert.host.js",
+    "cordis.patch.yml",
+    "locale/*.json",
+    "docs",
+    "icon.svg",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=22.15"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "immediately": true
+    }
+  },
+  "dependencies": {
+    "zod": "4.6.6"
+  },
+  "license": "MIT"
+}

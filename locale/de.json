@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Nutzung",
+    "description": "Zeigt Kontostand, Eingabe/Ausgabe/Cache/Kosten der aktuellen Runde, 24-Stunden-Spitzenzeiten und die letzten 10 Runden."
+  }
+}

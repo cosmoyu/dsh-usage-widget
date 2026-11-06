@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Usage",
+    "description": "Shows account balance, current-turn input/output/cache hit/cost, a 24-hour peak timeline, and the last 10 turns."
+  }
+}
