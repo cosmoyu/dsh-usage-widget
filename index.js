@@ -19,6 +19,7 @@ const HKT_OFFSET_MS = 8 * 3_600_000
 const PEAK_WINDOWS = [[1, 4], [6, 10]]
 const WEEKEND_OFFPEAK_SINCE = Date.parse('2026-08-22T16:00:00Z')
 const FLASH_PRICE_BOUNDARY = Date.parse('2026-09-10T04:00:00Z')
+/** Beijing dates DeepSeek treats as off-peak; extend this list every year. */
 const HOLIDAYS = new Set([
   '2026-09-25', '2026-09-26', '2026-09-27',
   '2026-10-01', '2026-10-02', '2026-10-03', '2026-10-04',
@@ -42,11 +43,6 @@ function number(value) {
 function dayKey(date) {
   const pad = value => String(value).padStart(2, '0')
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
-}
-
-function dayLabel(key) {
-  const [, month, day] = key.split('-')
-  return `${Number(month)}/${Number(day)}`
 }
 
 function emptyDay(key = '') {
@@ -261,7 +257,8 @@ function scanSessions(force) {
       fileCache.set(file, { mtimeMs: stat.mtimeMs, size: stat.size, events: list })
     }
     for (const event of list) {
-      const fingerprint = `${event.time}|${event.provider}|${event.model}|${event.input}|${event.output}|${event.cacheRead}|${event.cacheWrite}`
+      // Forked sessions repeat their parent's log; count each identical event once.
+      const fingerprint = `${event.time}|${event.provider}|${event.model}|${event.input}|${event.output}|${event.cacheRead}|${event.cacheWrite}|${event.reasoning}`
       if (seen.has(fingerprint)) continue
       seen.add(fingerprint)
       events.push(event)
@@ -530,7 +527,7 @@ async function getState(ctx, force) {
       remainingPct,
       dayStart,
       source: balance?.source ?? 'none',
-      error: balance === null ? '无法读取官方账户余额，请确认已登录或配置 DEEPSEEK_API_KEY。' : '',
+      error: balance === null ? 'unavailable' : '',
     },
     today,
     days,

@@ -24,6 +24,9 @@ window.__ModuleLoader__.load({
         refresh: '刷新',
         collapse: '缩小面板',
         expand: '展开面板',
+        loadFailed: '读取失败',
+        loadTimeout: '读取超时',
+        balanceUnavailable: '无法读取官方账户余额，请确认已登录或配置 DEEPSEEK_API_KEY。',
         loading: '读取中',
         unpriced: '部分模型未定价',
         until: '距',
@@ -46,6 +49,9 @@ window.__ModuleLoader__.load({
         refresh: 'Refresh',
         collapse: 'Collapse',
         expand: 'Expand',
+        loadFailed: 'Read failed',
+        loadTimeout: 'Read timed out',
+        balanceUnavailable: 'Balance unavailable — sign in to DeepSeek or set DEEPSEEK_API_KEY.',
         loading: 'Loading',
         unpriced: 'Some models are unpriced',
         until: 'to',
@@ -68,6 +74,9 @@ window.__ModuleLoader__.load({
         refresh: 'Aktualisieren',
         collapse: 'Einklappen',
         expand: 'Ausklappen',
+        loadFailed: 'Lesen fehlgeschlagen',
+        loadTimeout: 'Zeitüberschreitung beim Lesen',
+        balanceUnavailable: 'Kontostand nicht verfügbar – bitte bei DeepSeek anmelden oder DEEPSEEK_API_KEY setzen.',
         loading: 'Wird geladen',
         unpriced: 'Einige Modelle ohne Preis',
         until: 'bis',
@@ -90,6 +99,9 @@ window.__ModuleLoader__.load({
         refresh: 'Actualizar',
         collapse: 'Contraer',
         expand: 'Expandir',
+        loadFailed: 'Error de lectura',
+        loadTimeout: 'Tiempo de lectura agotado',
+        balanceUnavailable: 'Saldo no disponible: inicia sesión en DeepSeek o configura DEEPSEEK_API_KEY.',
         loading: 'Cargando',
         unpriced: 'Algunos modelos sin precio',
         until: 'hasta',
@@ -112,6 +124,9 @@ window.__ModuleLoader__.load({
         refresh: 'Actualiser',
         collapse: 'Réduire',
         expand: 'Développer',
+        loadFailed: 'Échec de la lecture',
+        loadTimeout: 'Délai de lecture dépassé',
+        balanceUnavailable: 'Solde indisponible — connectez-vous à DeepSeek ou définissez DEEPSEEK_API_KEY.',
         loading: 'Chargement',
         unpriced: 'Certains modèles sans tarif',
         until: 'dans',
@@ -134,6 +149,9 @@ window.__ModuleLoader__.load({
         refresh: '更新',
         collapse: '折りたたむ',
         expand: '展開する',
+        loadFailed: '読み込みに失敗しました',
+        loadTimeout: '読み込みがタイムアウトしました',
+        balanceUnavailable: '残高を取得できません。DeepSeek へのログインまたは DEEPSEEK_API_KEY の設定を確認してください。',
         loading: '読み込み中',
         unpriced: '一部モデルは価格未設定',
         until: 'あと',
@@ -156,6 +174,9 @@ window.__ModuleLoader__.load({
         refresh: 'Atualizar',
         collapse: 'Recolher',
         expand: 'Expandir',
+        loadFailed: 'Falha ao ler',
+        loadTimeout: 'Tempo de leitura esgotado',
+        balanceUnavailable: 'Saldo indisponível — entre no DeepSeek ou defina DEEPSEEK_API_KEY.',
         loading: 'Carregando',
         unpriced: 'Alguns modelos sem preço',
         until: 'até',
@@ -178,6 +199,9 @@ window.__ModuleLoader__.load({
         refresh: 'Обновить',
         collapse: 'Свернуть',
         expand: 'Развернуть',
+        loadFailed: 'Ошибка чтения',
+        loadTimeout: 'Время чтения истекло',
+        balanceUnavailable: 'Баланс недоступен — войдите в DeepSeek или задайте DEEPSEEK_API_KEY.',
         loading: 'Загрузка',
         unpriced: 'Некоторые модели без цены',
         until: 'до',
@@ -239,12 +263,43 @@ window.__ModuleLoader__.load({
       return result === undefined ? 'undefined' : String(result)
     }
 
+    const REQUEST_TIMEOUT_MS = 30_000
+
+    /** Bound one Remote call so a stuck Gateway cannot freeze the poller forever. */
+    function withTimeout(run, ms = REQUEST_TIMEOUT_MS) {
+      return new Promise((resolve, reject) => {
+        let settled = false
+        const timer = setTimeout(() => {
+          if (settled) return
+          settled = true
+          const error = new Error('timeout')
+          error.name = 'TimeoutError'
+          reject(error)
+        }, ms)
+        const finish = (callback, value) => {
+          if (settled) return
+          settled = true
+          clearTimeout(timer)
+          callback(value)
+        }
+        try {
+          Promise.resolve(run()).then(
+            value => finish(resolve, value),
+            reason => finish(reject, reason),
+          )
+        } catch (reason) {
+          finish(reject, reason)
+        }
+      })
+    }
+
     /** One shared poller for the always-visible footer card. */
     function createUsageStore(api) {
-      let snapshot = { state: null, error: '', busy: false, loaded: false }
+      let snapshot = { state: null, error: null, busy: false, loaded: false }
       const listeners = new Set()
       let timer = null
       let inFlight = false
+      let pendingForce = false
       let disposed = false
 
       const notify = () => {
@@ -255,21 +310,40 @@ window.__ModuleLoader__.load({
         notify()
       }
       const load = async (force = false) => {
-        if (!api || disposed || inFlight) return
+        if (!api || disposed) return
+        if (inFlight) {
+          if (force) {
+            pendingForce = true
+            set({ busy: true, error: null })
+          }
+          return
+        }
         inFlight = true
-        if (force) set({ busy: true, error: '' })
+        if (force) set({ busy: true, error: null })
         try {
-          const result = await (force ? api.refresh() : api.getState())
+          const result = await withTimeout(() => (force ? api.refresh() : api.getState()))
           const value = normalizeResult(result)
           if (value && typeof value === 'object' && value.balance && Array.isArray(value.turns)) {
-            set({ state: value, error: '', loaded: true, busy: false })
+            set({ state: value, error: null, loaded: true, busy: false })
           } else {
-            set({ error: '读取失败: ' + failureText(result), loaded: true, busy: false })
+            set({ error: { kind: 'failed', detail: failureText(result) }, loaded: true, busy: false })
           }
         } catch (reason) {
-          set({ error: reason instanceof Error ? reason.message : String(reason), loaded: true, busy: false })
+          const timeout = reason?.name === 'TimeoutError'
+          set({
+            error: {
+              kind: timeout ? 'timeout' : 'failed',
+              detail: timeout ? '' : (reason instanceof Error ? reason.message : String(reason)),
+            },
+            loaded: true,
+            busy: false,
+          })
         } finally {
           inFlight = false
+          if (pendingForce && !disposed) {
+            pendingForce = false
+            void load(true)
+          }
         }
       }
       const onVisibility = () => {
@@ -285,6 +359,7 @@ window.__ModuleLoader__.load({
       }
       const dispose = () => {
         disposed = true
+        pendingForce = false
         if (timer !== null) clearInterval(timer)
         timer = null
         document.removeEventListener('visibilitychange', onVisibility)
@@ -813,6 +888,7 @@ window.__ModuleLoader__.load({
       )
 
       const details = h('div', {
+        id: 'dshcost-details',
         className: 'ac-collapsible' + (collapsed ? '' : ' open'),
         'aria-hidden': collapsed ? 'true' : 'false',
       },
@@ -832,6 +908,11 @@ window.__ModuleLoader__.load({
         ),
       )
 
+      const error = snapshot.error
+      const errorText = !error
+        ? ''
+        : `${error.kind === 'timeout' ? t.loadTimeout : t.loadFailed}${error.detail ? ': ' + error.detail : ''}`
+
       return h('section', { className: 'ac-card' + (collapsed ? ' ac-collapsed' : ''), 'aria-label': t.title },
         h('style', null, CSS),
         h('div', { className: 'ac-card-head' },
@@ -843,6 +924,7 @@ window.__ModuleLoader__.load({
               title: collapsed ? t.expand : t.collapse,
               'aria-label': collapsed ? t.expand : t.collapse,
               'aria-expanded': collapsed ? 'false' : 'true',
+              'aria-controls': 'dshcost-details',
             }, collapsed ? h(ExpandIcon) : h(CollapseIcon)),
             h('button', {
               className: 'ac-iconbtn', type: 'button',
@@ -858,7 +940,7 @@ window.__ModuleLoader__.load({
             h('div', { className: 'ac-amount' }, money(balance?.total, currency), h('small', { className: 'ac-currency' }, currency)),
           ),
         ),
-        balance?.error ? h('div', { className: 'ac-note warn' }, balance.error) : null,
+        balance?.error ? h('div', { className: 'ac-note warn' }, t.balanceUnavailable) : null,
 
         h(FlipCard, {
           className: 'ac-round-flip',
@@ -868,7 +950,7 @@ window.__ModuleLoader__.load({
         }),
 
         details,
-        snapshot.error ? h('div', { className: 'ac-note warn' }, snapshot.error) : null,
+        errorText ? h('div', { className: 'ac-note warn' }, errorText) : null,
         !snapshot.loaded ? h('div', { className: 'ac-note' }, t.loading) : null,
       )
     }
