@@ -1,16 +1,16 @@
 {
-  "name": "dshcost-skill",
+  "name": "dsh-usage-widget",
   "version": "1.0.0",
   "private": true,
   "type": "module",
   "description": "Usage card with account balance, current-turn metrics, peak timeline, and last 10 turns on the DSH sidebar footer.",
   "repository": {
     "type": "git",
-    "url": "https://github.com/cosmoyu/dshcost-skill.git"
+    "url": "https://github.com/cosmoyu/dsh-usage-widget.git"
   },
-  "homepage": "https://github.com/cosmoyu/dshcost-skill",
+  "homepage": "https://github.com/cosmoyu/dsh-usage-widget",
   "bugs": {
-    "url": "https://github.com/cosmoyu/dshcost-skill/issues"
+    "url": "https://github.com/cosmoyu/dsh-usage-widget/issues"
   },
   "exports": {
     ".": "./index.js",

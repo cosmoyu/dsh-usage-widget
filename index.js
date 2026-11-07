@@ -4,7 +4,7 @@ import { basename, dirname, join } from 'node:path'
 import * as zlib from 'node:zlib'
 
 /**
- * Host half of dshcost-skill.
+ * Host half of dsh-usage-widget.
  *
  * The session log is the source of truth: every committed assistant message carries
  * a usage block, so the service can derive today's tokens/calls/cost and the recent

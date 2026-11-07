@@ -1,5 +1,5 @@
 window.__ModuleLoader__.load({
-  id: 'dshcost-skill',
+  id: 'dsh-usage-widget',
   factory(require) {
     const React = require('react')
     const h = React.createElement
@@ -820,7 +820,7 @@ window.__ModuleLoader__.load({
       )
     }
 
-    const COLLAPSED_KEY = 'dshcost:collapsed'
+    const COLLAPSED_KEY = 'dsh-usage-widget:collapsed'
 
     /** Compact is the default; an explicit expand is remembered across reloads. */
     function readCollapsed() {
@@ -888,7 +888,7 @@ window.__ModuleLoader__.load({
       )
 
       const details = h('div', {
-        id: 'dshcost-details',
+        id: 'dsh-usage-widget-details',
         className: 'ac-collapsible' + (collapsed ? '' : ' open'),
         'aria-hidden': collapsed ? 'true' : 'false',
       },
@@ -924,7 +924,7 @@ window.__ModuleLoader__.load({
               title: collapsed ? t.expand : t.collapse,
               'aria-label': collapsed ? t.expand : t.collapse,
               'aria-expanded': collapsed ? 'false' : 'true',
-              'aria-controls': 'dshcost-details',
+              'aria-controls': 'dsh-usage-widget-details',
             }, collapsed ? h(ExpandIcon) : h(CollapseIcon)),
             h('button', {
               className: 'ac-iconbtn', type: 'button',
@@ -957,15 +957,15 @@ window.__ModuleLoader__.load({
 
     function parseIdentity(value) { return value }
     function codec(name, schema) {
-      return { mode: 'strict', typeSymbol: 'dshcost-skill#' + name, schema, create: () => schema }
+      return { mode: 'strict', typeSymbol: 'dsh-usage-widget#' + name, schema, create: () => schema }
     }
 
     const stateCodec = codec('State', { parse: parseIdentity })
     const descriptors = {
-      package: 'dshcost-skill',
+      package: 'dsh-usage-widget',
       descriptors: [
         {
-          id: 'dshcost-skill#usageCost/getState',
+          id: 'dsh-usage-widget#usageCost/getState',
           service: 'usageCost',
           namespace: 'usageCost',
           method: 'getState',
@@ -974,7 +974,7 @@ window.__ModuleLoader__.load({
           result: stateCodec,
         },
         {
-          id: 'dshcost-skill#usageCost/refresh',
+          id: 'dsh-usage-widget#usageCost/refresh',
           service: 'usageCost',
           namespace: 'usageCost',
           method: 'refresh',
@@ -990,13 +990,13 @@ window.__ModuleLoader__.load({
       if (!remote || typeof remote.$mount !== 'function') return
       let unmount
       try { unmount = await remote.$mount(descriptors) } catch (reason) {
-        console.error('[dshcost-skill] remote mount failed', reason)
+        console.error('[dsh-usage-widget] remote mount failed', reason)
         return
       }
-      if (typeof unmount === 'function') ctx.effect(() => () => unmount(), 'dshcost: remote contribution')
+      if (typeof unmount === 'function') ctx.effect(() => () => unmount(), 'dsh-usage-widget: remote contribution')
       const api = ctx.get('remote.usageCost')
       if (api === undefined) {
-        console.error('[dshcost-skill] remote.usageCost is unavailable')
+        console.error('[dsh-usage-widget] remote.usageCost is unavailable')
         return
       }
       const localeService = ctx.get('locale')
@@ -1021,11 +1021,11 @@ window.__ModuleLoader__.load({
       const slots = ctx.get('slots')
       if (slots === undefined || typeof slots.inject !== 'function') return
       const store = createUsageStore(api)
-      ctx.effect(() => () => store.dispose(), 'dshcost: usage polling')
+      ctx.effect(() => () => store.dispose(), 'dsh-usage-widget: usage polling')
       store.start()
       slots.inject('sidebar.footer.action', () => slots.register({
         name: 'sidebar.footer.action',
-        id: 'dshcost-card',
+        id: 'dsh-usage-widget-card',
         order: -10,
         label: () => titleOf(localeFace.getSnapshot()),
         inject: () => ({ store, localeFace }),

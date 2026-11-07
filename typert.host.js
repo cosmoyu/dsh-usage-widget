@@ -83,7 +83,7 @@ const stateSchema = z.object({
 
 const strictCodec = (name, schema) => ({
   mode: 'strict',
-  typeSymbol: 'dshcost-skill#' + name,
+  typeSymbol: 'dsh-usage-widget#' + name,
   schema,
   create: () => schema,
 })
@@ -91,12 +91,12 @@ const strictCodec = (name, schema) => ({
 const stateCodec = strictCodec('State', stateSchema)
 
 export const TYPERT = {
-  package: 'dshcost-skill',
+  package: 'dsh-usage-widget',
   face: 'host',
   schemas: [],
   invocations: [
     {
-      id: 'dshcost-skill#usageCost/getState',
+      id: 'dsh-usage-widget#usageCost/getState',
       service: 'usageCost',
       namespace: 'usageCost',
       method: 'getState',
@@ -105,7 +105,7 @@ export const TYPERT = {
       result: stateCodec,
     },
     {
-      id: 'dshcost-skill#usageCost/refresh',
+      id: 'dsh-usage-widget#usageCost/refresh',
       service: 'usageCost',
       namespace: 'usageCost',
       method: 'refresh',

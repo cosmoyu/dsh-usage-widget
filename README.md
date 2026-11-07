@@ -16,13 +16,13 @@ DeepSeek Harness 侧栏底部的用量卡片。
 ## 安装
 
 ```bash
-git clone https://github.com/cosmoyu/dshcost-skill.git dshcost-skill
+git clone https://github.com/cosmoyu/dsh-usage-widget.git dsh-usage-widget
 ```
 
 在 DSH 中执行：
 
 ```text
-plugin_manager install_bundle <dshcost-skill 的绝对路径>
+plugin_manager install_bundle <dsh-usage-widget 的绝对路径>
 ```
 
 安装后刷新页面。
